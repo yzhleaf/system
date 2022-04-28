@@ -214,7 +214,6 @@ export default {
     },
     filterNames () {
       this.filterStaffInfo = this.staffInfo.filter((index) => {
-        console.log('zhixing')
         return index.name.includes(this.filterName)
       })
     },
