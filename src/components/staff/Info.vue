@@ -1,8 +1,6 @@
 <template>
   <div>
-    <el-input clearable placeholder="请输入姓名" style="width:300px;margin-left:5px;margin-bottom:10px" v-model="filterName"></el-input>
-    <el-button type="primary" icon="el-icon-search" @click="filterNames()">搜索</el-button>
-    <el-button type="primary" icon="el-icon-refresh" @click="resetFilterNames()">重置搜索</el-button>
+    <el-input clearable placeholder="请输入姓名" style="width:300px;margin-left:5px;margin-bottom:10px" v-model="filterName" @:onchange="filterNames()"></el-input>
     <el-button type="primary" icon="el-icon-plus" @click="addStaffInfo()" value="添加职员" >添加职员</el-button>
       <el-table
     :data="filterStaffInfo.slice((currentPage-1)*pageSize,currentPage*pageSize)"
@@ -160,6 +158,11 @@ export default {
   created () {
     this.getStaffInfo()
   },
+  watch: {
+    filterName (newname, oldname) {
+      this.filterNames()
+    }
+  },
   methods: {
     async  getStaffInfo () {
       const res = await staffInfo()
@@ -211,12 +214,9 @@ export default {
     },
     filterNames () {
       this.filterStaffInfo = this.staffInfo.filter((index) => {
-        return index.name === this.filterName
+        console.log('zhixing')
+        return index.name.includes(this.filterName)
       })
-    },
-    resetFilterNames () {
-      this.filterStaffInfo = this.staffInfo
-      this.filterName = ''
     },
     addStaffInfo () {
       this.dialogVisible = true
