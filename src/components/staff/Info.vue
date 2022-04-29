@@ -67,7 +67,7 @@
         <el-button
           size="mini"
           type="danger"
-          @click="handleDelete(scope.$index, staffInfo)">删除</el-button>
+          @click="handleDelete(scope.$index, scope.row)">删除</el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -125,7 +125,7 @@
       :current-page.sync="currentPage"
       :page-size="pageSize"
       layout="prev, pager, next, jumper"
-      :total="filterStaffInfo.length">
+      :total="staffInfo.length">
     </el-pagination>
   </div>
 </template>
@@ -165,9 +165,16 @@ export default {
   },
   methods: {
     async  getStaffInfo () {
+      let t1 = new Date().getTime()
       const res = await staffInfo()
+      let t2 = new Date().getTime()
+      console.log(t2 - t1)
+      let t4 = new Date().getTime()
       this.staffInfo = res.staffInfo
-      this.filterStaffInfo = Object.assign([], this.staffInfo)
+      let t3 = new Date().getTime()
+      console.log(t3 - t4)
+      // 深拷贝是为了搜索时不改变原数据
+      this.filterStaffInfo = JSON.parse(JSON.stringify(this.staffInfo))
     },
     handleEdit (index, row) {
       this.index = index
@@ -177,19 +184,27 @@ export default {
     },
     updateStaffInfo () {
       if (this.buttonVal === '编辑') {
+        for (let i = 0; i < this.staffInfo.length; i++) {
+          if (this.staffInfo[i].name === this.row.name) {
+            this.index = i
+            console.log(i)
+          }
+        }
+        this.staffInfo.splice(this.index, 1, this.row)
+        this.filterStaffInfo.splice(this.index, 1, this.row)
+        this.filterName = ''
+        this.$notify({
+          title: '成功',
+          message: '编辑成功',
+          duration: 1000,
+          type: 'success'
+        })
         staffInfo2(this.row).then(res => {
-          this.staffInfo = res.staffInfo
-          this.filterStaffInfo.splice(this.index, 1, this.row)
-          this.$notify({
-            title: '成功',
-            message: '编辑成功',
-            duration: 1000,
-            type: 'success'
-          })
+
         })
       } else if (this.buttonVal === '添加职员') {
         this.staffInfo.push(this.row)
-        this.filterStaffInfo = this.staffInfo
+        this.filterStaffInfo.push(this.row)
         this.$notify({
           title: '成功',
           message: '添加成功',
@@ -203,8 +218,16 @@ export default {
       this.dialogVisible = false
     },
     handleDelete (index, row) {
-      this.index = index
+      for (let i = 0; i < this.staffInfo.length; i++) {
+        if (this.staffInfo[i].name === row.name) {
+          this.index = i
+          console.log(i)
+        }
+      }
+      this.staffInfo.splice(this.index, 1)
       this.filterStaffInfo.splice(this.index, 1)
+      console.log(this.index)
+      this.filterName = ''
       this.$notify({
         title: '成功',
         message: '删除成功',
@@ -213,9 +236,12 @@ export default {
       })
     },
     filterNames () {
+      let tt1 = new Date().getTime()
       this.filterStaffInfo = this.staffInfo.filter((index) => {
         return index.name.includes(this.filterName)
       })
+      let tt2 = new Date().getTime()
+      console.log(tt2 - tt1)
     },
     addStaffInfo () {
       this.dialogVisible = true
